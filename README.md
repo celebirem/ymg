@@ -8,10 +8,10 @@ REMIT, kullanıcıların yerler, oyunlar, tarifler, izlenceler, okumalar ve dinl
   - Kullanıcılar hesap oluşturabilir, giriş yapabilir ve şifrelerini değiştirebilir.
 - **Profil Yönetimi**
   - Kullanıcılar profil bilgilerini görüntüleyebilir, kullanıcı adını ve şifresini güncelleyebilir.
-- **Yerler Modülü**
-  - Kullanıcılar yer kategorisinde yeni anılar ekleyebilir, mevcut anılarını düzenleyebilir veya silebilir.
 - **Kategoriler**
   - Yerler, oyunlar, tarifler, izlenceler, okumalar ve dinlenceler için ayrı kategoriler bulunmaktadır.
+- **Yerler Modülü**
+  - Kullanıcılar yer kategorisinde yeni anılar ekleyebilir, mevcut anılarını düzenleyebilir veya silebilir. Diğer kategoriler için de aynı işlevler geçerlidir.
 - **Fotoğraf Yönetimi**
   - Her kategoriye fotoğraf eklenebilir, fotoğraflar düzenlenebilir ve önizlenebilir.
 - **Şifreli Veritabanı Bağlantısı**
@@ -33,7 +33,7 @@ src/main/java/org/example/remit
 │   ├── LoginScreenDatabase.java        # Kullanıcı doğrulama
 │   ├── RegisterScreen.java             # Kullanıcı kayıt ekranı
 │   ├── RegisterScreenDatabase.java     # Kullanıcı kayıt işlemleri
-│   └── DikdortgenGUI.java              # Ana kategori ekranı
+│   └── MainScreen.java                 # Ana kategori ekranı
 ├── profil
 │   ├── Profil.java                     # Profil ekranı
 │   ├── KullaniciAdiDegistir.java       # Kullanıcı adı değiştirme ekranı
@@ -113,7 +113,7 @@ db.password=sifre
 ```
 
 5. **Projeyi Çalıştırın:**
-Ana sınıf olarak OpeningScreen veya SecondScreen sınıflarını çalıştırarak uygulamayı başlatın.
+Ana sınıf olarak OpeningScreen sınıfını çalıştırarak uygulamayı başlatın.
 
 ---
 ## Kullanım
@@ -202,7 +202,7 @@ Ana sınıf olarak OpeningScreen veya SecondScreen sınıflarını çalıştıra
 #### `SecondScreen`
 - Giriş ve kayıt ekranlarına yönlendiren bir ekrandır.
 
-#### `DikdortgenGUI`
+#### `MainScreen`
 - Anıların kategorilere ayrıldığı ana ekran.
 - Her kategori için özel ikonlar ve yönlendirme bağlantıları içerir.
 - "Profilim" düğmesi ile kullanıcı profil sayfasına geçiş yapılır.
@@ -214,13 +214,21 @@ Ana sınıf olarak OpeningScreen veya SecondScreen sınıflarını çalıştıra
 #### `Yerler`
 - Kullanıcının yer kategorisine ait fotoğraflarını görüntülediği ve yönetebildiği arayüzdür.
 - Fotoğraflar grid düzeninde gösterilir.
+- Kullanıcı, fotoğraflara tıklayarak düzenleme ekranına geçebilir veya “Sil” butonuyla kayıtları silebilir.
 
 #### `YerEditScreen`
 - Kullanıcının bir fotoğrafın adını, açıklamasını ve görselini düzenlemesini sağlar.
+- Mevcut veriler (ad, açıklama, görsel) düzenlenebilir form alanlarına yüklenir.
+- Güncelleme sonrası veritabanında değişiklikler kaydedilir.
 
 #### `YeniYerEkleScreen`
 - Yeni bir yer eklemek için kullanıcıya form sunar.
-- Fotoğraf yükleme ve önizleme desteği içerir.
+- Kullanıcı, yer adı ve açıklamasını girerek bir fotoğraf yükleyebilir.
+- Fotoğraf seçimi sonrası görsel önizleme özelliği sunar.
+
+#### `YeniYerEkleScreenDatabase`
+- Yeni bir yer eklemek için kullanıcıya form sunar.
+- Görsel dosyası, Blob formatında veritabanına kaydedilir.
 
 ---
 
@@ -236,3 +244,89 @@ CREATE TABLE `kayit` (
   UNIQUE KEY `kullaniciAd_UNIQUE` (`kullaniciAd`)
 );
 ```
+---
+## OOP Prensiplerinin Sağlanması
+
+**1. Encapsulation (Kapsülleme)**
+- Alanlar (fields) genellikle private olarak tanımlanmıştır. Bu sayede, sınıfın dışından doğrudan erişim engellenmiş ve veri gizliliği sağlanmıştır.
+- Verilere erişim ve değiştirme işlemleri, yalnızca ilgili sınıfın getter/setter metodları veya sınıfın içindeki iş mantıklarıyla yapılır.
+
+**2. Inheritance (Kalıtım)**
+- Projede Java Swing bileşenleri (örneğin JFrame, JPanel, JDialog) kullanılarak kalıtım sağlanmıştır. Bu, kullanıcı arayüzü sınıflarının temel Swing özelliklerini miras almasını ve üzerine yeni özellikler eklenmesini mümkün kılmıştır.
+- *JPanel* ve *JButton* gibi Swing bileşenleri özelleştirilmiş ve yeni davranışlar eklenmiştir:
+
+**3. Polymorphism (Çok Biçimlilik)**
+- **Override (Üzerine Yazma):** Swing bileşenleri özelleştirilerek varsayılan davranışların üzerine yazılmıştır. Örneğin, *OvalButton* sınıfında paintComponent metodu, düğmenin tasarımını değiştirmek için özelleştirilmiştir.
+- **Interface Kullanımı:** Runnable arabirimi, geri çağırma fonksiyonları için uygulanmıştır.
+
+**4. Abstraction (Soyutlama)**
+- Projede, veritabanı işlemleri soyutlanarak iş mantığından ayrılmıştır. Veritabanı bağlantısı, *DatabaseConnection* sınıfı üzerinden soyutlanmıştır. Bu, her sınıfın kendi bağlantısını oluşturmaktansa merkezi bir yapı kullanmasını sağlar.
+- Veritabanı işlemleri, ayrı bir sınıf olan *YeniYerEkleScreenDatabase* içinde toplanmıştır. Böylece GUI sınıfları (ör. YeniYerEkleScreen) yalnızca arayüz ile ilgilenir.
+
+---
+## SOLID Prensiplerinin Sağlanması
+
+**1. Single Responsibility Principle (Tek Sorumluluk Prensibi)**
+- Projede her sınıf, belirli bir görevi yerine getirmek üzere tasarlanmıştır:
+  - *DatabaseConnection*, veritabanı bağlantısını yönetir.
+  - *YeniYerEkleScreenDatabase, LoginScreenDatabase, RegisterScreenDatabase* gibi sınıflar, veritabanı işlemleriyle ilgilenir.
+  - *Yerler, YerEditScreen ve YeniYerEkleScreen* yerlerle ilgili GUI işlemleri için tasarlanmıştır.
+  - *Profil, SifreDegistir, KullaniciAdiDegistir ve HesapSil* profil yönetimiyle ilgili işlemleri sağlar.
+
+Bu yaklaşım ile, kodun okunabilirliğini arttırmak ve her sınıfın yalnızca bir işlevi yerine getirmesi amaçlanmıştır. Böylece herhangi bir değişiklik gerektiğinde yalnızca ilgili sınıf güncellenebilir.
+
+**2. Open/Closed Principle (Açık/Kapalı Prensibi)**
+- Yeni özellikler eklenirken mevcut sınıflar değiştirilmeden yeni sınıflar ve işlevler eklenmiştir:
+  - Örneğin, Yerler, Oyunlar, İzlenceler gibi kategoriler için ayrı sınıflar oluşturulmuş ve her biri veritabanı erişimi ve GUI yönetimi gibi işlevleri bağımsız olarak sağlamıştır.
+  - Yerler gibi sınıflar, dinamik kategorilere göre verileri göstermek için genişletilebilecek şekilde tasarlanmıştır.
+ 
+Bu tasarım, projeye yeni bir kategori (örn. Müzikler) eklenmek istendiğinde, mevcut kodların değiştirilmesine gerek kalmadan yeni sınıflar eklenerek genişletilmesini sağlar.
+
+**3. Liskov Substitution Principle (Liskov’un Yerine Geçme Prensibi)**
+- Swing bileşenleri (JPanel, JButton, JFrame) genişletilmiş ve yeni davranışlar eklenmiştir:
+  - Örneğin; *OvalButton* sınıfı, özelleştirilmiş bir düğme davranışı sağlar ancak standart *JButton* gibi her yerde kullanılabilir.
+  - Bu, *JButton* yerine *OvalButton* kullanılmasının mevcut işleyişi bozmamasını sağlar.
+  - Geri çağırma mekanizmaları da benzer şekilde tasarlanmıştır; Runnable arabirimi kullanılarak ekran güncellemeleri standart bir yöntemle gerçekleştirilir.
+ 
+Bu sayede sınıflar, değiştirilmeden birbirinin yerine geçebilir veya genişletilebilir.
+
+**4. Interface Segregation Principle (Arayüz Ayrımı Prensibi)**
+- 	Projede, büyük ve karmaşık arayüzler yerine, küçük ve belirli görevler için yapılandırılmış sınıflar kullanılmıştır:
+  - Örneğin, Swing tabanlı arayüzler ve veritabanı işlemleri farklı sınıflarda ayrılmıştır: *YeniYerEkleScreen*, Kullanıcıdan veri alır ve arayüzü yönetir; *YeniYerEkleScreenDatabase* ise Verilerin MySQL veritabanına kaydedilmesini sağlar.
+
+Bu ayrım, her bir sınıfın yalnızca kendi işlevine odaklanmasını ve diğer sınıflarla gereksiz bağımlılıklardan kaçınılmasını sağlar.
+
+**5. Dependency Inversion Principle (Bağımlılıkların Ters Çevrilmesi Prensibi)**
+- Projede veritabanı bağlantısı merkezi bir sınıf olan DatabaseConnection aracılığıyla yönetilir. Böylece diğer sınıflar doğrudan *DriverManage*r gibi düşük seviyeli bileşenlere bağlı değildir.
+- *DatabaseConnection* sınıfı soyut bir bağlantı sağlar. Eğer ileride veritabanı sistemi değiştirilmek istenirse, yalnızca bu sınıfın değiştirilmesi yeterlidir. Uygulamanın geri kalanı bu değişimden etkilenmez.
+- Benzer şekilde, geri çağırma işlemleri için Runnable arabirimi kullanılmıştır. Bu, farklı işlem türlerinin kolayca uyarlanabilmesini sağlar.
+  
+---
+## CRUD Prensiplerinin Sağlanması
+
+**1. Create(Oluşturma)**
+- Projede kullanıcıların ve anıların oluşturulması için çeşitli mekanizmalar sağlanmıştır:
+  - *RegisterScreen*, kullanıcıların kayıt olmasını sağlayan bir ekran sunar. Kullanıcı adı, e-posta ve şifre bilgileri alınıp veritabanına eklenir.
+  - *RegisterScreenDatabase* sınıfı, kullanıcı verilerini kayit tablosuna kaydeder.
+  - *YeniYerEkleScreen*, kullanıcıların yer kategorisine ait yeni kayıtlar eklemesini sağlar. Yer adı, açıklama ve fotoğraf bilgileri alınıp veritabanına kaydedilir.
+  - *YeniYerEkleScreenDatabase* sınıfı, bu bilgileri veritabanındaki user_images tablosuna ekler.
+
+**2. Read(Okuma)**
+- Projede verilerin okunması ve kullanıcıya gösterilmesi için mekanizmalar tasarlanmıştır:
+  - Yerler sınıfı, yer kategorisindeki tüm kayıtları kullanıcıya grid düzeninde gösterir.
+  - Veriler, veritabanından SELECT sorgusu ile okunur. Okunan fotoğraflar ve yer adları bir panel üzerinde dinamik olarak listelenir.
+  - *Profil* sınıfı, kullanıcıya “Hoş Geldiniz” mesajı ve kullanıcı adı gibi bilgileri gösterir. Kullanıcı adı dinamik olarak profilde güncellenir.
+ 
+**3. Update(Güncelleme)**
+- Projede verilerin güncellenmesi için kullanıcıya düzenleme ekranları sağlanmıştır:
+  - *SifreDegistir* sınıfı, kullanıcının mevcut şifresini kontrol ederek yeni şifreyi günceller.
+  - *KullaniciAdiDegistir* sınıfı, kullanıcı adının güncellenmesini sağlar.
+  - *YerEditScreen*, kullanıcının bir yer kaydına ait adı, açıklamayı ve fotoğrafı düzenlemesine olanak tanır.
+
+**4. Delete(Silme)**
+- Projede kullanıcıların ve anıların silinmesi için seçenekler sunulmuştur:
+  - *HesapSil* sınıfı, kullanıcının hesabını kayıt tablosundan siler. Kullanıcının hesabı silindikten sonra uygulama kapanır.
+  - *Yerler* sınıfındaki “Sil” butonu, bir yer kaydını veritabanından kaldırır. Silinen kayıt, arayüzden de dinamik olarak kaldırılır
+
+
+
