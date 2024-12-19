@@ -22,6 +22,40 @@ Bu problemde, bir sınıfta toplam 50 öğrenci 5 gruba ayrılmıştır. Her gru
 
 3. **Sonuç Mesajı**:  
    - Tüm thread'lerin çalışması tamamlandığında, her grubun temsilci seçtiğini belirten bir mesaj yazdırılır.
+  
+### Kod
+```Soru 1
+import threading
+
+# Grup thread sınıfı
+class Grup(threading.Thread):
+    def __init__(self, grup_no, ogrenci_sayisi):
+        super().__init__()
+        self.grup_no = grup_no
+        self.ogrenci_sayisi = ogrenci_sayisi
+
+    def run(self):
+        # Öğrencileri kontrol etme
+        print(f"Grup {self.grup_no}: {self.ogrenci_sayisi} öğrenci kontrol edildi.")
+
+# Toplam öğrenci sayısı ve grup sayısı
+toplam_ogrenci = 50
+grup_sayisi = 5
+ogrenci_per_grup = toplam_ogrenci // grup_sayisi
+
+# Threadleri başlatma
+grup_threadleri = []
+for i in range(grup_sayisi):
+    grup = Grup(grup_no=i + 1, ogrenci_sayisi=ogrenci_per_grup)
+    grup_threadleri.append(grup)
+    grup.start()
+
+for thread in grup_threadleri:
+    thread.join()
+
+print("Her grup bir temsilci seçti.")
+
+```
 
 ### Kod Çıktısı
 - Kodu çalıştırdıktan sonra, çıktı şu şekilde olur:
@@ -52,7 +86,71 @@ Bu problemde, bir yemekhanede 3 tezgah ve yemek almak isteyen 50 öğrenci var. 
 - `lock` kullanılarak, tüm thread'lerin aynı global değişkeni (`ogrenci_kaldi`) düzgün bir şekilde güncellemesi sağlanır.  
 
 4. **Sonuç Mesajı**:  
-- Tüm öğrenciler yemek aldıktan sonra "Tüm öğrenciler yemek aldı. Program sonlanıyor." mesajı yazdırılır.  
+- Tüm öğrenciler yemek aldıktan sonra "Tüm öğrenciler yemek aldı. Program sonlanıyor." mesajı yazdırılır.
+
+### Kod
+```Soru 2
+import threading
+import time
+import random
+
+# Yemekhane semaforu
+tezgah_kapasitesi = 5
+toplam_ogrenci = 50
+tezgah_sayisi = 3
+
+semafor = threading.Semaphore(tezgah_kapasitesi)
+
+# Ortak sayaç için kilit
+lock = threading.Lock()
+ogrenci_kaldi = toplam_ogrenci
+
+# Tezgah thread sınıfı
+class Tezgah(threading.Thread):
+    def __init__(self, tezgah_no):
+        super().__init__()
+        self.tezgah_no = tezgah_no
+        self.local_count = 0  # Tezgahın hizmet verdiği öğrenci sayısı
+
+    def run(self):
+        global ogrenci_kaldi
+
+        while True:
+            # Semafor izni alma işlemi
+            semafor.acquire()
+            with lock:
+                if ogrenci_kaldi > 0:
+                    ogrenci_kaldi -= 1
+                    self.local_count += 1
+                    print(f"Tezgah {self.tezgah_no}: 1 öğrenci yemek aldı. Kalan öğrenci: {ogrenci_kaldi}")
+                else:
+                    semafor.release()
+                    break
+
+            # Rastgele gecikme
+            time.sleep(random.uniform(0.1, 0.5))
+
+            # Tezgah dolduysa mesaj yazdılır
+            if self.local_count % tezgah_kapasitesi == 0:
+                print(f"Tezgah {self.tezgah_no} doldu, öğrenciler bekliyor.")
+                time.sleep(random.uniform(0.2, 0.5))  # Bekleme süresi
+
+            semafor.release()
+
+# Tezgahları başlatma
+tezgahlar = []
+for i in range(tezgah_sayisi):
+    tezgah = Tezgah(tezgah_no=i + 1)
+    tezgahlar.append(tezgah)
+    tezgah.start()
+
+# Tezgahların tamamlanmasını bekleme
+for tezgah in tezgahlar:
+    tezgah.join()
+
+print("Tüm öğrenciler yemek aldı. Program sonlanıyor.")
+
+```
 
 ### Kod Çıktısı
 - Kodu çalıştırdıktan sonra, çıktı şu şekilde olur:
